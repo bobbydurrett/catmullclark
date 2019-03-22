@@ -30,9 +30,11 @@ input_faces = [
 So, the graph is a list of points and a list of faces.
 Each face is a list of indexes into the points list.
 
-First part of the algorithm on the RC page is
+next part of the algorithm on the RC page is
 
-for each face, a face point is created which is the average of all the points of the face.
+for each edge, an edge point is created which is the average 
+between the center of the edge and the center of the segment made
+with the face points of the two adjacent faces..
 
 """
 
@@ -53,7 +55,7 @@ input_faces = [
 
 NUM_DIMENSIONS = 3
 
-# face points will have one point for each face
+# face_points will have one point for each face
 
 face_points = []
 
@@ -74,6 +76,6 @@ for curr_face in input_faces:
 for fp in face_points:
     print(fp)
     
-    
+
             
 
