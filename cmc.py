@@ -88,7 +88,7 @@ def get_face_points(input_points, input_faces):
     return face_points
     
 # square
-
+"""
 input_points = [
   [0.0, 0.0,  0.0],
   [1.0, 0.0,  0.0],
@@ -99,8 +99,59 @@ input_points = [
 input_faces = [
   [0, 1, 2, 3]
 ]
+"""
+
+# cube
+
+input_points = [
+  [-1.0,  1.0,  1.0],
+  [-1.0, -1.0,  1.0],
+  [ 1.0, -1.0,  1.0],
+  [ 1.0,  1.0,  1.0],
+  [ 1.0, -1.0, -1.0],
+  [ 1.0,  1.0, -1.0],
+  [-1.0, -1.0, -1.0],
+  [-1.0,  1.0, -1.0]
+]
+
+input_faces = [
+  [0, 1, 2, 3],
+  [3, 2, 4, 5],
+  [5, 4, 6, 7],
+  [7, 0, 3, 5],
+  [7, 6, 1, 0],
+  [6, 1, 2, 4],
+]
+
 
 face_points = get_face_points(input_points, input_faces)
 
-for fp in face_points:
-    print(fp)
+# get list of edges with duplicates removed
+
+edges = []
+
+for face in input_faces:
+    num_points = len(face)
+    # loop over index into face
+    for pointindex in range(num_points):
+        # if not last point then edge is curr point and next point
+        if pointindex < num_points - 1:
+            pointnum_1 = face[pointindex]
+            pointnum_2 = face[pointindex+1]
+        else:
+            # for last point edge is curr point and first point
+            pointnum_1 = face[pointindex]
+            pointnum_2 = face[0]
+        # order points in edge by lowest point number
+        if pointnum_1 > pointnum_2:
+            temp = pointnum_1
+            pointnum_1 = pointnum_2
+            pointnum_2 = temp
+        edges.append((pointnum_1, pointnum_2))
+        
+# now we have a list of edges with duplicates so dedup
+
+edges = sorted(set(edges))
+
+for e in edges:
+    print(e)
