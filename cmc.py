@@ -34,7 +34,25 @@ next part of the algorithm on the RC page is
 
 for each edge, an edge point is created which is the average 
 between the center of the edge and the center of the segment made
-with the face points of the two adjacent faces..
+with the face points of the two adjacent faces.
+
+My thoughts:
+
+Using our representation of faces there are the same number of 
+edges as points. A quadrilateral has 4 points and 4 edges.
+The last point in the list has an edge connecting back to the
+first point.
+
+To find the two faces that are adjacent to an edge we need
+to find the two faces that have the two edge points in them 
+in either order.
+
+In the example above these two faces:
+
+  [0, 1, 2, 3]
+  [3, 2, 4, 5]
+
+are adjacent to the edge 2,3 or 3,2
 
 """
 
@@ -76,6 +94,3 @@ for curr_face in input_faces:
 for fp in face_points:
     print(fp)
     
-
-            
-
