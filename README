@@ -14,3 +14,5 @@ cccube.py - input cube graphed in 3D
 outputfaces.py - desired output after one transformation
 graphed in 3D.
 
+https://people.eecs.berkeley.edu/~sequin/CS284/PAPERS/CatmullClark_SDSurf.pdf
+
