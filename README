@@ -1,5 +1,7 @@
 Solution for Rosetta Code Catmull–Clark subdivision surface task in Python
 
+http://rosettacode.org/wiki/Catmull%E2%80%93Clark_subdivision_surface
+
 Thinking of using 3D version of Matplotlib plot to draw the wireframe
 around each face.
 
