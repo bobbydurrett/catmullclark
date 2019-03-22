@@ -1,1 +1,14 @@
 Solution for Rosetta Code Catmull–Clark subdivision surface task in Python
+
+Thinking of using 3D version of Matplotlib plot to draw the wireframe
+around each face.
+
+Example scripts based on the input and output in the text discussion.
+
+http://rosettacode.org/wiki/Talk:Catmull%E2%80%93Clark_subdivision_surface
+
+cccube.py - input cube graphed in 3D
+
+outputfaces.py - desired output after one transformation
+graphed in 3D.
+
