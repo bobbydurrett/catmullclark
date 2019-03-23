@@ -301,45 +301,8 @@ edges_faces = get_edges_faces(input_points, input_faces)
 
 edge_points = get_edge_points(input_points, edges_faces)
                 
-"""
-
-for each point calculate
-
-the average of the face points of the faces the point belongs to (avg_face_points)
-
-create a list of lists of two numbers [facepoint_sum, num_points] by going through the
-points in all the faces.
-
-then create the avg_face_points list of point by dividing point_sum (x, y, z) by num_points
-
-"""
-
-# initialize list with [[0.0, 0.0, 0.0], 0]
-
-num_points = len(input_points)
-
-temp_points = []
-
-for pointnum in range(num_points):
-    temp_points.append([[0.0, 0.0, 0.0], 0])
-    
-# loop through faces updating temp_points
-
-for facenum in range(len(input_faces)):
-    fp = face_points[facenum]
-    for pointnum in input_faces[facenum]:
-        tp = temp_points[pointnum][0]
-        temp_points[pointnum][0] = sum_point(tp,fp)
-        temp_points[pointnum][1] += 1
-        
-# divide to create avg_face_points
-
-avg_face_points = []
-
-for tp in temp_points:
-   afp = div_point(tp[0], tp[1])
-   avg_face_points.append(afp)
-   
+# the average of the face points of the faces the point belongs to (avg_face_points)                
+                
 avg_face_points = get_avg_face_points(input_points, input_faces, face_points)
    
 for afp in avg_face_points:
