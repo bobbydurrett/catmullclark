@@ -259,7 +259,47 @@ def get_avg_face_points(input_points, input_faces, face_points):
        avg_face_points.append(afp)
        
     return avg_face_points
-   
+    
+def get_avg_mid_edges(input_points, edges_faces):
+    """
+    
+    the average of the centers of edges the point belongs to (avg_mid_edges)
+    
+    create list with entry for each point 
+    each entry has two elements. one is a point that is the sum of the centers of the edges
+    and the other is the number of edges. after going through all edges divide by
+    number of edges.
+    
+    """
+    
+    # initialize list with [[0.0, 0.0, 0.0], 0]
+    
+    num_points = len(input_points)
+    
+    temp_points = []
+    
+    for pointnum in range(num_points):
+        temp_points.append([[0.0, 0.0, 0.0], 0])
+        
+    # go through edges_faces using center updating each point
+    
+    for edge in edges_faces:
+        cp = edge[4]
+        for pointnum in [edge[0], edge[1]]:
+            tp = temp_points[pointnum][0]
+            temp_points[pointnum][0] = sum_point(tp,cp)
+            temp_points[pointnum][1] += 1
+    
+    # divide out number of points to get average
+    
+    avg_mid_edges = []
+        
+    for tp in temp_points:
+       ame = div_point(tp[0], tp[1])
+       avg_mid_edges.append(ame)
+       
+    return avg_mid_edges
+
 # square
 """
 input_points = [
@@ -315,17 +355,8 @@ edge_points = get_edge_points(input_points, edges_faces)
 avg_face_points = get_avg_face_points(input_points, input_faces, face_points)
    
 # the average of the centers of edges the point belongs to (avg_mid_edges)
-
-"""
-the average of the centers of edges the point belongs to (avg_mid_edges)
-
-create list with entry for each point 
-each entry has two elements. one is a point that is the sum of the centers of the edges
-and the other is the number of edges. after going through all edges divide by
-number of edges.
-
-"""
-
-
-        
-    
+   
+avg_mid_edges = get_avg_mid_edges(input_points, edges_faces) 
+   
+for ame in avg_mid_edges:
+    print(ame)
