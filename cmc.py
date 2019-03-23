@@ -356,6 +356,16 @@ def get_new_points(input_points, points_faces, avg_face_points, avg_mid_edges):
         
     return new_points
     
+def switch_nums(point_nums):
+    """
+    Returns tuple of point numbers
+    sorted least to most
+    """
+    if point_nums[0] < point_nums[1]:
+        return point_nums
+    else:
+        return (point_nums[1], point_nums[0])    
+    
 # square
 """
 input_points = [
@@ -489,46 +499,44 @@ for edgenum in range(len(edges_faces)):
     edge_point_nums[(pointnum_1, pointnum_2)] = next_pointnum
     next_pointnum += 1
 
-print(face_point_nums)
-print(edge_point_nums)
+# new_points now has the points to output. Need new
+# faces
 
-sp = sorted(new_points)
-    
-for np in sp:
-    print(np)
-    
-print(" ")
-    
-output_points = [
-  [-0.555556,  0.555556,  0.555556],
-  [-0.555556, -0.555556,  0.555556],
-  [ 0.555556, -0.555556,  0.555556],
-  [ 0.555556,  0.555556,  0.555556],
-  [ 0.555556, -0.555556, -0.555556],
-  [ 0.555556,  0.555556, -0.555556],
-  [-0.555556, -0.555556, -0.555556],
-  [-0.555556,  0.555556, -0.555556],
-  [ 0.000000,  0.000000,  1.000000],
-  [-0.750000,  0.000000,  0.750000],
-  [ 0.000000, -0.750000,  0.750000],
-  [ 0.750000,  0.000000,  0.750000],
-  [ 0.000000,  0.750000,  0.750000],
-  [ 1.000000,  0.000000,  0.000000],
-  [ 0.750000, -0.750000,  0.000000],
-  [ 0.750000,  0.000000, -0.750000],
-  [ 0.750000,  0.750000,  0.000000],
-  [ 0.000000,  0.000000, -1.000000],
-  [ 0.000000, -0.750000, -0.750000],
-  [-0.750000,  0.000000, -0.750000],
-  [ 0.000000,  0.750000, -0.750000],
-  [ 0.000000,  1.000000,  0.000000],
-  [-0.750000,  0.750000,  0.000000],
-  [-1.000000,  0.000000,  0.000000],
-  [-0.750000, -0.750000,  0.000000],
-  [ 0.000000, -1.000000,  0.000000]
-]
+"""
 
-sp = sorted(output_points)
-    
-for np in sp:
-    print(np)
+just doing this case for now:
+
+for a quad face (a,b,c,d):
+   (a, edge_point ab, face_point abcd, edge_point da)
+   (b, edge_point bc, face_point abcd, edge_point ab)
+   (c, edge_point cd, face_point abcd, edge_point bc)
+   (d, edge_point da, face_point abcd, edge_point cd)
+   
+new_faces will be a list of lists where the elements are like this:
+
+[pointnum_1, pointnum_2, pointnum_3, pointnum_4]
+
+"""
+
+new_faces =[]
+
+for oldfacenum in range(len(input_faces)):
+    oldface = input_faces[oldfacenum]
+    # 4 point face
+    if len(oldface) == 4:
+        a = oldface[0]
+        b = oldface[1]
+        c = oldface[2]
+        d = oldface[3]
+        face_point_abcd = face_point_nums[oldfacenum]
+        edge_point_ab = edge_point_nums[switch_nums((a, b))]
+        edge_point_da = edge_point_nums[switch_nums((d, a))]
+        edge_point_bc = edge_point_nums[switch_nums((b, c))]
+        edge_point_cd = edge_point_nums[switch_nums((c, d))]
+        new_faces.append((a, edge_point_ab, face_point_abcd, edge_point_da))
+        new_faces.append((b, edge_point_bc, face_point_abcd, edge_point_ab))
+        new_faces.append((c, edge_point_cd, face_point_abcd, edge_point_bc))
+        new_faces.append((d, edge_point_da, face_point_abcd, edge_point_cd))
+
+for nf in new_faces:
+    print(nf)
