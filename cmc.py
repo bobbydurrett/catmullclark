@@ -83,6 +83,16 @@ def div_point(p, d):
         sp.append(p[i]/d)
         
     return sp
+    
+def mul_point(p, m):
+    """ 
+    multiply point p by m
+    """
+    sp = []
+    for i in range(3):
+        sp.append(p[i]*m)
+        
+    return sp
 
 def get_face_points(input_points, input_faces):
     """
@@ -317,6 +327,38 @@ def get_points_faces(input_points, input_faces):
             points_faces[pointnum] += 1
             
     return points_faces
+
+def get_new_points(input_points, points_faces, avg_face_points, avg_mid_edges):
+    """
+    
+    m1 = (n - 3) / n
+    m2 = 1 / n
+    m3 = 2 / n
+    new_coords = (m1 * old_coords)
+               + (m2 * avg_face_points)
+               + (m3 * avg_mid_edges)
+                        
+    """
+    
+    new_points =[]
+    
+    for pointnum in range(len(input_points)):
+        n = points_faces[pointnum]
+        m1 = (n - 3) / n
+        m2 = 1 / n
+        m3 = 2 / n
+        old_coords = input_points[pointnum]
+        p1 = mul_point(old_coords, m1)
+        afp = avg_face_points[pointnum]
+        p2 = mul_point(afp, m2)
+        ame = avg_mid_edges[pointnum]
+        p3 = mul_point(ame, m3)
+        p4 = sum_point(p1, p2)
+        new_coords = sum_point(p4, p3)
+        
+        new_points.append(new_coords)
+        
+    return new_points
     
 # square
 """
@@ -380,5 +422,20 @@ avg_mid_edges = get_avg_mid_edges(input_points, edges_faces)
 
 points_faces = get_points_faces(input_points, input_faces)
 
-for p in points_faces:
-    print(p)
+"""
+
+m1 = (n - 3) / n
+m2 = 1 / n
+m3 = 2 / n
+new_coords = (m1 * old_coords)
+           + (m2 * avg_face_points)
+           + (m3 * avg_mid_edges)
+                    
+"""
+    
+new_points = get_new_points(input_points, points_faces, avg_face_points, avg_mid_edges)
+    
+for np in new_points:
+    print(np)
+    
+    
