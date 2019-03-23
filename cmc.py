@@ -196,7 +196,7 @@ def get_edges_faces(input_points, input_faces):
             
     return edges_centers
        
-def get_edge_points(input_points, edges_faces):
+def get_edge_points(input_points, edges_faces, face_points):
     """
     for each edge, an edge point is created which is the average 
     between the center of the edge and the center of the segment made
@@ -365,20 +365,180 @@ def switch_nums(point_nums):
         return point_nums
     else:
         return (point_nums[1], point_nums[0])    
-    
-# square
-"""
-input_points = [
-  [0.0, 0.0,  0.0],
-  [1.0, 0.0,  0.0],
-  [1.0, 1.0,  0.0],
-  [0.0, 1.0,  0.0]
-]
 
-input_faces = [
-  [0, 1, 2, 3]
-]
-"""
+def cmc_subdiv(input_point, input_faces):
+    # 1. for each face, a face point is created which is the average of all the points of the face.
+    # each entry in the returned list is a point (x, y, z).
+    
+    face_points = get_face_points(input_points, input_faces)
+    
+    # get list of edges with 1 or 2 adjacent faces
+    # [pointnum_1, pointnum_2, facenum_1, facenum_2, center] or
+    # [pointnum_1, pointnum_2, facenum_1, None, center]
+    
+    edges_faces = get_edges_faces(input_points, input_faces)
+    
+    # get edge points, a list of points
+    
+    edge_points = get_edge_points(input_points, edges_faces, face_points)
+                    
+    # the average of the face points of the faces the point belongs to (avg_face_points)                
+                    
+    avg_face_points = get_avg_face_points(input_points, input_faces, face_points)
+       
+    # the average of the centers of edges the point belongs to (avg_mid_edges)
+       
+    avg_mid_edges = get_avg_mid_edges(input_points, edges_faces) 
+       
+    # how many faces a point belongs to
+    
+    points_faces = get_points_faces(input_points, input_faces)
+    
+    """
+    
+    m1 = (n - 3) / n
+    m2 = 1 / n
+    m3 = 2 / n
+    new_coords = (m1 * old_coords)
+               + (m2 * avg_face_points)
+               + (m3 * avg_mid_edges)
+                        
+    """
+        
+    new_points = get_new_points(input_points, points_faces, avg_face_points, avg_mid_edges)
+        
+    """
+    
+    Then each face is replaced by new faces made with the new points,
+    
+    for a triangle face (a,b,c):
+       (a, edge_point ab, face_point abc, edge_point ca)
+       (b, edge_point bc, face_point abc, edge_point ab)
+       (c, edge_point ca, face_point abc, edge_point bc)
+       
+    for a quad face (a,b,c,d):
+       (a, edge_point ab, face_point abcd, edge_point da)
+       (b, edge_point bc, face_point abcd, edge_point ab)
+       (c, edge_point cd, face_point abcd, edge_point bc)
+       (d, edge_point da, face_point abcd, edge_point cd)
+       
+    face_points is a list indexed by face number so that is
+    easy to get.
+    
+    edge_points is a list indexed by the edge number
+    which is an index into edges_faces.
+    
+    need to add face_points and edge points to 
+    new_points and get index into each.
+    
+    then create two new structures
+    
+    face_point_nums - list indexes by facenum
+    whose value is the index into new_points
+    
+    edge_point num - dictionary with key (pointnum_1, pointnum_2)
+    and value is index into new_points
+       
+    """
+    
+    # add face points to new_points
+    
+    face_point_nums = []
+    
+    # point num after next append to new_points
+    next_pointnum = len(new_points)
+    
+    for face_point in face_points:
+        new_points.append(face_point)
+        face_point_nums.append(next_pointnum)
+        next_pointnum += 1
+        
+    # add edge points to new_points
+    
+    edge_point_nums = dict()
+    
+    for edgenum in range(len(edges_faces)):
+        pointnum_1 = edges_faces[edgenum][0]
+        pointnum_2 = edges_faces[edgenum][1]
+        edge_point = edge_points[edgenum]
+        new_points.append(edge_point)
+        edge_point_nums[(pointnum_1, pointnum_2)] = next_pointnum
+        next_pointnum += 1
+    
+    # new_points now has the points to output. Need new
+    # faces
+    
+    """
+    
+    just doing this case for now:
+    
+    for a quad face (a,b,c,d):
+       (a, edge_point ab, face_point abcd, edge_point da)
+       (b, edge_point bc, face_point abcd, edge_point ab)
+       (c, edge_point cd, face_point abcd, edge_point bc)
+       (d, edge_point da, face_point abcd, edge_point cd)
+       
+    new_faces will be a list of lists where the elements are like this:
+    
+    [pointnum_1, pointnum_2, pointnum_3, pointnum_4]
+    
+    """
+    
+    new_faces =[]
+    
+    for oldfacenum in range(len(input_faces)):
+        oldface = input_faces[oldfacenum]
+        # 4 point face
+        if len(oldface) == 4:
+            a = oldface[0]
+            b = oldface[1]
+            c = oldface[2]
+            d = oldface[3]
+            face_point_abcd = face_point_nums[oldfacenum]
+            edge_point_ab = edge_point_nums[switch_nums((a, b))]
+            edge_point_da = edge_point_nums[switch_nums((d, a))]
+            edge_point_bc = edge_point_nums[switch_nums((b, c))]
+            edge_point_cd = edge_point_nums[switch_nums((c, d))]
+            new_faces.append((a, edge_point_ab, face_point_abcd, edge_point_da))
+            new_faces.append((b, edge_point_bc, face_point_abcd, edge_point_ab))
+            new_faces.append((c, edge_point_cd, face_point_abcd, edge_point_bc))
+            new_faces.append((d, edge_point_da, face_point_abcd, edge_point_cd))    
+    
+    return new_points, new_faces
+    
+from mpl_toolkits.mplot3d import axes3d
+import matplotlib.pyplot as plt
+import numpy as np
+
+def graph_output(output_points, output_faces):
+    
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    
+    """
+    
+    Plot each face
+    
+    """
+    
+    for facenum in range(len(output_faces)):
+        curr_face = output_faces[facenum]
+        xcurr = []
+        ycurr = []
+        zcurr = []
+        for pointnum in range(len(curr_face)):
+            xcurr.append(output_points[curr_face[pointnum]][0])
+            ycurr.append(output_points[curr_face[pointnum]][1])
+            zcurr.append(output_points[curr_face[pointnum]][2])
+        xcurr.append(output_points[curr_face[0]][0])
+        ycurr.append(output_points[curr_face[0]][1])
+        zcurr.append(output_points[curr_face[0]][2])
+        
+        ax.plot(xcurr,ycurr,zcurr,color='b')
+    
+    plt.show()
+
+
 # cube
 
 input_points = [
@@ -401,214 +561,11 @@ input_faces = [
   [6, 1, 2, 4],
 ]
 
-# 1. for each face, a face point is created which is the average of all the points of the face.
-# each entry in the returned list is a point (x, y, z).
+output_points, output_faces = cmc_subdiv(input_points, input_faces)
 
-face_points = get_face_points(input_points, input_faces)
+graph_output(output_points, output_faces)
 
-# get list of edges with 1 or 2 adjacent faces
-# [pointnum_1, pointnum_2, facenum_1, facenum_2, center] or
-# [pointnum_1, pointnum_2, facenum_1, None, center]
 
-edges_faces = get_edges_faces(input_points, input_faces)
-
-# get edge points, a list of points
-
-edge_points = get_edge_points(input_points, edges_faces)
-                
-# the average of the face points of the faces the point belongs to (avg_face_points)                
-                
-avg_face_points = get_avg_face_points(input_points, input_faces, face_points)
-   
-# the average of the centers of edges the point belongs to (avg_mid_edges)
-   
-avg_mid_edges = get_avg_mid_edges(input_points, edges_faces) 
-   
-# how many faces a point belongs to
-
-points_faces = get_points_faces(input_points, input_faces)
-
-"""
-
-m1 = (n - 3) / n
-m2 = 1 / n
-m3 = 2 / n
-new_coords = (m1 * old_coords)
-           + (m2 * avg_face_points)
-           + (m3 * avg_mid_edges)
-                    
-"""
     
-new_points = get_new_points(input_points, points_faces, avg_face_points, avg_mid_edges)
-    
-"""
 
-Then each face is replaced by new faces made with the new points,
-
-for a triangle face (a,b,c):
-   (a, edge_point ab, face_point abc, edge_point ca)
-   (b, edge_point bc, face_point abc, edge_point ab)
-   (c, edge_point ca, face_point abc, edge_point bc)
-   
-for a quad face (a,b,c,d):
-   (a, edge_point ab, face_point abcd, edge_point da)
-   (b, edge_point bc, face_point abcd, edge_point ab)
-   (c, edge_point cd, face_point abcd, edge_point bc)
-   (d, edge_point da, face_point abcd, edge_point cd)
-   
-face_points is a list indexed by face number so that is
-easy to get.
-
-edge_points is a list indexed by the edge number
-which is an index into edges_faces.
-
-need to add face_points and edge points to 
-new_points and get index into each.
-
-then create two new structures
-
-face_point_nums - list indexes by facenum
-whose value is the index into new_points
-
-edge_point num - dictionary with key (pointnum_1, pointnum_2)
-and value is index into new_points
-   
-"""
-
-# add face points to new_points
-
-face_point_nums = []
-
-# point num after next append to new_points
-next_pointnum = len(new_points)
-
-for face_point in face_points:
-    new_points.append(face_point)
-    face_point_nums.append(next_pointnum)
-    next_pointnum += 1
-    
-# add edge points to new_points
-
-edge_point_nums = dict()
-
-for edgenum in range(len(edges_faces)):
-    pointnum_1 = edges_faces[edgenum][0]
-    pointnum_2 = edges_faces[edgenum][1]
-    edge_point = edge_points[edgenum]
-    new_points.append(edge_point)
-    edge_point_nums[(pointnum_1, pointnum_2)] = next_pointnum
-    next_pointnum += 1
-
-# new_points now has the points to output. Need new
-# faces
-
-"""
-
-just doing this case for now:
-
-for a quad face (a,b,c,d):
-   (a, edge_point ab, face_point abcd, edge_point da)
-   (b, edge_point bc, face_point abcd, edge_point ab)
-   (c, edge_point cd, face_point abcd, edge_point bc)
-   (d, edge_point da, face_point abcd, edge_point cd)
-   
-new_faces will be a list of lists where the elements are like this:
-
-[pointnum_1, pointnum_2, pointnum_3, pointnum_4]
-
-"""
-
-new_faces =[]
-
-for oldfacenum in range(len(input_faces)):
-    oldface = input_faces[oldfacenum]
-    # 4 point face
-    if len(oldface) == 4:
-        a = oldface[0]
-        b = oldface[1]
-        c = oldface[2]
-        d = oldface[3]
-        face_point_abcd = face_point_nums[oldfacenum]
-        edge_point_ab = edge_point_nums[switch_nums((a, b))]
-        edge_point_da = edge_point_nums[switch_nums((d, a))]
-        edge_point_bc = edge_point_nums[switch_nums((b, c))]
-        edge_point_cd = edge_point_nums[switch_nums((c, d))]
-        new_faces.append((a, edge_point_ab, face_point_abcd, edge_point_da))
-        new_faces.append((b, edge_point_bc, face_point_abcd, edge_point_ab))
-        new_faces.append((c, edge_point_cd, face_point_abcd, edge_point_bc))
-        new_faces.append((d, edge_point_da, face_point_abcd, edge_point_cd))
-
-output_points = [
-  [-0.5555555555555556,  0.5555555555555556,  0.5555555555555556],
-  [-0.5555555555555556, -0.5555555555555556,  0.5555555555555556],
-  [ 0.5555555555555556, -0.5555555555555556,  0.5555555555555556],
-  [ 0.5555555555555556,  0.5555555555555556,  0.5555555555555556],
-  [ 0.5555555555555556, -0.5555555555555556, -0.5555555555555556],
-  [ 0.5555555555555556,  0.5555555555555556, -0.5555555555555556],
-  [-0.5555555555555556, -0.5555555555555556, -0.5555555555555556],
-  [-0.5555555555555556,  0.5555555555555556, -0.5555555555555556],
-  [ 0.000000,  0.000000,  1.000000],
-  [-0.750000,  0.000000,  0.750000],
-  [ 0.000000, -0.750000,  0.750000],
-  [ 0.750000,  0.000000,  0.750000],
-  [ 0.000000,  0.750000,  0.750000],
-  [ 1.000000,  0.000000,  0.000000],
-  [ 0.750000, -0.750000,  0.000000],
-  [ 0.750000,  0.000000, -0.750000],
-  [ 0.750000,  0.750000,  0.000000],
-  [ 0.000000,  0.000000, -1.000000],
-  [ 0.000000, -0.750000, -0.750000],
-  [-0.750000,  0.000000, -0.750000],
-  [ 0.000000,  0.750000, -0.750000],
-  [ 0.000000,  1.000000,  0.000000],
-  [-0.750000,  0.750000,  0.000000],
-  [-1.000000,  0.000000,  0.000000],
-  [-0.750000, -0.750000,  0.000000],
-  [ 0.000000, -1.000000,  0.000000]
-]
-
-output_faces = [
-  [ 0,  9,  8, 12],
-  [ 1, 10,  8,  9],
-  [ 2, 11,  8, 10],
-  [ 3, 12,  8, 11],
-  [ 3, 11, 13, 16],
-  [ 2, 14, 13, 11],
-  [ 4, 15, 13, 14],
-  [ 5, 16, 13, 15],
-  [ 5, 15, 17, 20],
-  [ 4, 18, 17, 15],
-  [ 6, 19, 17, 18],
-  [ 7, 20, 17, 19],
-  [ 7, 22, 21, 20],
-  [ 0, 12, 21, 22],
-  [ 3, 16, 21, 12],
-  [ 5, 20, 21, 16],
-  [ 7, 19, 23, 22],
-  [ 6, 24, 23, 19],
-  [ 1,  9, 23, 24],
-  [ 0, 22, 23,  9],
-  [ 6, 24, 25, 18],
-  [ 1, 10, 25, 24],
-  [ 2, 14, 25, 10],
-  [ 4, 18, 25, 14]
-]
-
-print("correct output faces")
-
-for of in output_faces:
-    points = []
-    for pnum in of:
-        points.append(output_points[pnum])
-    sp = sorted(points)
-    print(sp)
-    
-print("my output faces")
-
-for of in new_faces:
-    points = []
-    for pnum in of:
-        points.append(new_points[pnum])
-    sp = sorted(points)
-    print(sp)
 
