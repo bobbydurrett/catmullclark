@@ -44,7 +44,7 @@ for each vertex point, its coordinates are updated from (new_coords):
 
     how many faces a point belongs to (n), then use this formula:
     
-    m1 = (n - 3) / n
+         m1 = (n - 3) / n
          m2 = 1 / n
          m3 = 2 / n
          new_coords = (m1 * old_coords)
@@ -300,6 +300,24 @@ def get_avg_mid_edges(input_points, edges_faces):
        
     return avg_mid_edges
 
+def get_points_faces(input_points, input_faces):
+    # initialize list with 0
+    
+    num_points = len(input_points)
+    
+    points_faces = []
+    
+    for pointnum in range(num_points):
+        points_faces.append(0)
+        
+    # loop through faces updating points_faces
+    
+    for facenum in range(len(input_faces)):
+        for pointnum in input_faces[facenum]:
+            points_faces[pointnum] += 1
+            
+    return points_faces
+    
 # square
 """
 input_points = [
@@ -358,5 +376,9 @@ avg_face_points = get_avg_face_points(input_points, input_faces, face_points)
    
 avg_mid_edges = get_avg_mid_edges(input_points, edges_faces) 
    
-for ame in avg_mid_edges:
-    print(ame)
+# how many faces a point belongs to
+
+points_faces = get_points_faces(input_points, input_faces)
+
+for p in points_faces:
+    print(p)
