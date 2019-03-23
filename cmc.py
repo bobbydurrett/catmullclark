@@ -32,25 +32,21 @@ Each face is a list of indexes into the points list.
 
 next part of the algorithm on the RC page is
 
-3.
+4.
 
-for each vertex point, its coordinates are updated from (new_coords):
+Then each face is replaced by new faces made with the new points,
 
-    the old coordinates (old_coords),
-     
-    the average of the face points of the faces the point belongs to (avg_face_points),
-
-    the average of the centers of edges the point belongs to (avg_mid_edges),
-
-    how many faces a point belongs to (n), then use this formula:
-    
-         m1 = (n - 3) / n
-         m2 = 1 / n
-         m3 = 2 / n
-         new_coords = (m1 * old_coords)
-                    + (m2 * avg_face_points)
-                    + (m3 * avg_mid_edges)
-
+for a triangle face (a,b,c):
+   (a, edge_point ab, face_point abc, edge_point ca)
+   (b, edge_point bc, face_point abc, edge_point ab)
+   (c, edge_point ca, face_point abc, edge_point bc)
+   
+for a quad face (a,b,c,d):
+   (a, edge_point ab, face_point abcd, edge_point da)
+   (b, edge_point bc, face_point abcd, edge_point ab)
+   (c, edge_point cd, face_point abcd, edge_point bc)
+   (d, edge_point da, face_point abcd, edge_point cd)
+   
 """
 
 def center_point(p1, p2):
