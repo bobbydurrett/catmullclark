@@ -87,6 +87,70 @@ def get_face_points(input_points, input_faces):
         
     return face_points
     
+def get_edges_faces(input_points, input_faces):
+    """
+    
+    Get list of edges and the one or two adjacent faces in a list.
+    
+    Each edge would be [pointnum_1, pointnum_2, facenum_1, facenum_2]
+    
+    """
+    
+    # will have [pointnum_1, pointnum_2, facenum]
+    
+    edges = []
+    
+    # get edges from each face
+    
+    for facenum in range(len(input_faces)):
+        face = input_faces[facenum]
+        num_points = len(face)
+        # loop over index into face
+        for pointindex in range(num_points):
+            # if not last point then edge is curr point and next point
+            if pointindex < num_points - 1:
+                pointnum_1 = face[pointindex]
+                pointnum_2 = face[pointindex+1]
+            else:
+                # for last point edge is curr point and first point
+                pointnum_1 = face[pointindex]
+                pointnum_2 = face[0]
+            # order points in edge by lowest point number
+            if pointnum_1 > pointnum_2:
+                temp = pointnum_1
+                pointnum_1 = pointnum_2
+                pointnum_2 = temp
+            edges.append([pointnum_1, pointnum_2, facenum])
+            
+    # sort edges by pointnum_1, pointnum_2, facenum
+    
+    edges = sorted(edges)
+    
+    # merge edges with 2 adjacent faces
+    # [pointnum_1, pointnum_2, facenum_1, facenum_2] or
+    # [pointnum_1, pointnum_2, facenum_1, None]
+    
+    num_edges = len(edges)
+    eindex = 0
+    merged_edges = []
+    
+    while eindex < num_edges:
+        e1 = edges[eindex]
+        # check if not last edge
+        if eindex < num_edges - 1:
+            e2 = edges[eindex+1]
+            if e1[0] == e2[0] and e1[1] == e2[1]:
+                merged_edges.append([e1[0],e1[1],e1[2],e2[2]])
+                eindex += 2
+            else:
+                merged_edges.append([e1[0],e1[1],e1[2],None])
+                eindex += 1
+        else:
+            merged_edges.append([e1[0],e1[1],e1[2],None])
+            eindex += 1
+            
+    return merged_edges
+        
 # square
 """
 input_points = [
@@ -100,7 +164,6 @@ input_faces = [
   [0, 1, 2, 3]
 ]
 """
-
 # cube
 
 input_points = [
@@ -123,35 +186,17 @@ input_faces = [
   [6, 1, 2, 4],
 ]
 
+# 1. for each face, a face point is created which is the average of all the points of the face.
+# each entry in the returned list is a point (x, y, z).
 
 face_points = get_face_points(input_points, input_faces)
 
-# get list of edges with duplicates removed
+# get list of edges with 1 or 2 adjacent faces
+# [pointnum_1, pointnum_2, facenum_1, facenum_2] or
+# [pointnum_1, pointnum_2, facenum_1, None]
 
-edges = []
-
-for face in input_faces:
-    num_points = len(face)
-    # loop over index into face
-    for pointindex in range(num_points):
-        # if not last point then edge is curr point and next point
-        if pointindex < num_points - 1:
-            pointnum_1 = face[pointindex]
-            pointnum_2 = face[pointindex+1]
-        else:
-            # for last point edge is curr point and first point
-            pointnum_1 = face[pointindex]
-            pointnum_2 = face[0]
-        # order points in edge by lowest point number
-        if pointnum_1 > pointnum_2:
-            temp = pointnum_1
-            pointnum_1 = pointnum_2
-            pointnum_2 = temp
-        edges.append((pointnum_1, pointnum_2))
-        
-# now we have a list of edges with duplicates so dedup
-
-edges = sorted(set(edges))
-
+edges = get_edges_faces(input_points, input_faces)
+            
 for e in edges:
     print(e)
+
