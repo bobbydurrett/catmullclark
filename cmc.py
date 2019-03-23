@@ -431,7 +431,104 @@ new_coords = (m1 * old_coords)
     
 new_points = get_new_points(input_points, points_faces, avg_face_points, avg_mid_edges)
     
-for np in new_points:
+"""
+
+Then each face is replaced by new faces made with the new points,
+
+for a triangle face (a,b,c):
+   (a, edge_point ab, face_point abc, edge_point ca)
+   (b, edge_point bc, face_point abc, edge_point ab)
+   (c, edge_point ca, face_point abc, edge_point bc)
+   
+for a quad face (a,b,c,d):
+   (a, edge_point ab, face_point abcd, edge_point da)
+   (b, edge_point bc, face_point abcd, edge_point ab)
+   (c, edge_point cd, face_point abcd, edge_point bc)
+   (d, edge_point da, face_point abcd, edge_point cd)
+   
+face_points is a list indexed by face number so that is
+easy to get.
+
+edge_points is a list indexed by the edge number
+which is an index into edges_faces.
+
+need to add face_points and edge points to 
+new_points and get index into each.
+
+then create two new structures
+
+face_point_nums - list indexes by facenum
+whose value is the index into new_points
+
+edge_point num - dictionary with key (pointnum_1, pointnum_2)
+and value is index into new_points
+   
+"""
+
+# add face points to new_points
+
+face_point_nums = []
+
+# point num after next append to new_points
+next_pointnum = len(new_points)
+
+for face_point in face_points:
+    new_points.append(face_point)
+    face_point_nums.append(next_pointnum)
+    next_pointnum += 1
+    
+# add edge points to new_points
+
+edge_point_nums = dict()
+
+for edgenum in range(len(edges_faces)):
+    pointnum_1 = edges_faces[edgenum][0]
+    pointnum_2 = edges_faces[edgenum][1]
+    edge_point = edge_points[edgenum]
+    new_points.append(edge_point)
+    edge_point_nums[(pointnum_1, pointnum_2)] = next_pointnum
+    next_pointnum += 1
+
+print(face_point_nums)
+print(edge_point_nums)
+
+sp = sorted(new_points)
+    
+for np in sp:
     print(np)
     
+print(" ")
     
+output_points = [
+  [-0.555556,  0.555556,  0.555556],
+  [-0.555556, -0.555556,  0.555556],
+  [ 0.555556, -0.555556,  0.555556],
+  [ 0.555556,  0.555556,  0.555556],
+  [ 0.555556, -0.555556, -0.555556],
+  [ 0.555556,  0.555556, -0.555556],
+  [-0.555556, -0.555556, -0.555556],
+  [-0.555556,  0.555556, -0.555556],
+  [ 0.000000,  0.000000,  1.000000],
+  [-0.750000,  0.000000,  0.750000],
+  [ 0.000000, -0.750000,  0.750000],
+  [ 0.750000,  0.000000,  0.750000],
+  [ 0.000000,  0.750000,  0.750000],
+  [ 1.000000,  0.000000,  0.000000],
+  [ 0.750000, -0.750000,  0.000000],
+  [ 0.750000,  0.000000, -0.750000],
+  [ 0.750000,  0.750000,  0.000000],
+  [ 0.000000,  0.000000, -1.000000],
+  [ 0.000000, -0.750000, -0.750000],
+  [-0.750000,  0.000000, -0.750000],
+  [ 0.000000,  0.750000, -0.750000],
+  [ 0.000000,  1.000000,  0.000000],
+  [-0.750000,  0.750000,  0.000000],
+  [-1.000000,  0.000000,  0.000000],
+  [-0.750000, -0.750000,  0.000000],
+  [ 0.000000, -1.000000,  0.000000]
+]
+
+sp = sorted(output_points)
+    
+for np in sp:
+    print(np)
