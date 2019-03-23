@@ -1,18 +1,15 @@
-Solution for Rosetta Code Catmull–Clark subdivision surface task in Python
+Solution for Rosetta Code Catmull-Clark subdivision surface task in Python
 
 http://rosettacode.org/wiki/Catmull%E2%80%93Clark_subdivision_surface
 
-Thinking of using 3D version of Matplotlib plot to draw the wireframe
-around each face.
+cmc.py - my solution to the task
 
-Example scripts based on the input and output in the text discussion.
+Does not handle holes or faces without 4 points.
 
-http://rosettacode.org/wiki/Talk:Catmull%E2%80%93Clark_subdivision_surface
+Example outputs
 
-cccube.py - input cube graphed in 3D
-
-outputfaces.py - desired output after one transformation
-graphed in 3D.
-
-https://people.eecs.berkeley.edu/~sequin/CS284/PAPERS/CatmullClark_SDSurf.pdf
+inputcube.png - input with no subdivisions
+onesubdiv.png - output with one subdivision
+twosubdiv.png - two subdivisions
+foursubdiv.png - four
 
