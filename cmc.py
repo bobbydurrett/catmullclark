@@ -53,6 +53,37 @@ for each vertex point, its coordinates are updated from (new_coords):
 
 """
 
+def center_point(p1, p2):
+    """ 
+    returns a point in the center of the 
+    segment ended by points p1 and p2
+    """
+    cp = []
+    for i in range(3):
+        cp.append((p1[i]+p2[i])/2)
+        
+    return cp
+    
+def sum_point(p1, p2):
+    """ 
+    adds points p1 and p2
+    """
+    sp = []
+    for i in range(3):
+        sp.append(p1[i]+p2[i])
+        
+    return sp
+
+def div_point(p, d):
+    """ 
+    divide point p by d
+    """
+    sp = []
+    for i in range(3):
+        sp.append(p[i]/d)
+        
+    return sp
+
 def get_face_points(input_points, input_faces):
     """
     From http://rosettacode.org/wiki/Catmull%E2%80%93Clark_subdivision_surface
@@ -88,8 +119,9 @@ def get_edges_faces(input_points, input_faces):
     """
     
     Get list of edges and the one or two adjacent faces in a list.
+    also get center point of edge
     
-    Each edge would be [pointnum_1, pointnum_2, facenum_1, facenum_2]
+    Each edge would be [pointnum_1, pointnum_2, facenum_1, facenum_2, center]
     
     """
     
@@ -146,19 +178,18 @@ def get_edges_faces(input_points, input_faces):
             merged_edges.append([e1[0],e1[1],e1[2],None])
             eindex += 1
             
-    return merged_edges
+    # add edge centers
     
-def center_point(p1, p2):
-    """ 
-    returns a point in the center of the 
-    segment ended by points p1 and p2
-    """
-    cp = []
-    for i in range(3):
-        cp.append((p1[i]+p2[i])/2)
-        
-    return cp
+    edges_centers = []
     
+    for me in merged_edges:
+        p1 = input_points[me[0]]
+        p2 = input_points[me[1]]
+        cp = center_point(p1, p2)
+        edges_centers.append(me+[cp])
+            
+    return edges_centers
+       
 def get_edge_points(input_points, edges_faces):
     """
     for each edge, an edge point is created which is the average 
@@ -170,9 +201,7 @@ def get_edge_points(input_points, edges_faces):
     
     for edge in edges_faces:
         # get center of edge
-        p1 = input_points[edge[0]]
-        p2 = input_points[edge[1]]
-        cp = center_point(p1, p2)
+        cp = edge[4]
         # get center of two facepoints
         fp1 = face_points[edge[2]]
         # if not two faces just use one facepoint
@@ -189,26 +218,6 @@ def get_edge_points(input_points, edges_faces):
         
     return edge_points
     
-def sum_point(p1, p2):
-    """ 
-    adds points p1 and p2
-    """
-    sp = []
-    for i in range(3):
-        sp.append(p1[i]+p2[i])
-        
-    return sp
-
-def div_point(p, d):
-    """ 
-    divide point p by d
-    """
-    sp = []
-    for i in range(3):
-        sp.append(p[i]/d)
-        
-    return sp
-
 def get_avg_face_points(input_points, input_faces, face_points):
     """
     
@@ -292,8 +301,8 @@ input_faces = [
 face_points = get_face_points(input_points, input_faces)
 
 # get list of edges with 1 or 2 adjacent faces
-# [pointnum_1, pointnum_2, facenum_1, facenum_2] or
-# [pointnum_1, pointnum_2, facenum_1, None]
+# [pointnum_1, pointnum_2, facenum_1, facenum_2, center] or
+# [pointnum_1, pointnum_2, facenum_1, None, center]
 
 edges_faces = get_edges_faces(input_points, input_faces)
 
@@ -305,9 +314,18 @@ edge_points = get_edge_points(input_points, edges_faces)
                 
 avg_face_points = get_avg_face_points(input_points, input_faces, face_points)
    
-for afp in avg_face_points:
-    print(afp)
+# the average of the centers of edges the point belongs to (avg_mid_edges)
 
-        
+"""
+the average of the centers of edges the point belongs to (avg_mid_edges)
+
+create list with entry for each point 
+each entry has two elements. one is a point that is the sum of the centers of the edges
+and the other is the number of edges. after going through all edges divide by
+number of edges.
+
+"""
+
+
         
     
