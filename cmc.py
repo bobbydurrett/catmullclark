@@ -49,6 +49,11 @@ for a quad face (a,b,c,d):
    
 """
 
+from mpl_toolkits.mplot3d import axes3d
+import matplotlib.pyplot as plt
+import numpy as np
+import sys
+
 def center_point(p1, p2):
     """ 
     returns a point in the center of the 
@@ -366,7 +371,7 @@ def switch_nums(point_nums):
     else:
         return (point_nums[1], point_nums[0])    
 
-def cmc_subdiv(input_point, input_faces):
+def cmc_subdiv(input_points, input_faces):
     # 1. for each face, a face point is created which is the average of all the points of the face.
     # each entry in the returned list is a point (x, y, z).
     
@@ -506,9 +511,6 @@ def cmc_subdiv(input_point, input_faces):
     
     return new_points, new_faces
     
-from mpl_toolkits.mplot3d import axes3d
-import matplotlib.pyplot as plt
-import numpy as np
 
 def graph_output(output_points, output_faces):
     
@@ -561,8 +563,17 @@ input_faces = [
   [6, 1, 2, 4],
 ]
 
-output_points, output_faces = cmc_subdiv(input_points, input_faces)
-
+if len(sys.argv) != 2:
+    print("Should have one argument integer number of iterations")
+    sys.exit()
+else:
+    iterations = int(sys.argv[1])
+    
+    output_points, output_faces = input_points, input_faces
+    
+    for i in range(iterations):
+        output_points, output_faces = cmc_subdiv(output_points, output_faces)
+        
 graph_output(output_points, output_faces)
 
 
