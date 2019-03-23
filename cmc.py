@@ -150,7 +150,48 @@ def get_edges_faces(input_points, input_faces):
             eindex += 1
             
     return merged_edges
+    
+def center_point(p1, p2):
+    """ 
+    returns a point in the center of the 
+    segment ended by points p1 and p2
+    """
+    cp = []
+    for i in range(3):
+        cp.append((p1[i]+p2[i])/2)
         
+    return cp
+    
+def get_edge_points(input_points, edges_faces):
+    """
+    for each edge, an edge point is created which is the average 
+    between the center of the edge and the center of the segment made
+    with the face points of the two adjacent faces.
+    """
+    
+    edge_points = []
+    
+    for edge in edges_faces:
+        # get center of edge
+        p1 = input_points[edge[0]]
+        p2 = input_points[edge[1]]
+        cp = center_point(p1, p2)
+        # get center of two facepoints
+        fp1 = face_points[edge[2]]
+        # if not two faces just use one facepoint
+        # should not happen for solid like a cube
+        if edge[3] == None:
+            fp2 = fp1
+        else:
+            fp2 = face_points[edge[3]]
+        cfp = center_point(fp1, fp2)
+        # get average between center of edge and
+        # center of facepoints
+        edge_point = center_point(cp, cfp)
+        edge_points.append(edge_point)      
+        
+    return edge_points
+    
 # square
 """
 input_points = [
@@ -195,8 +236,11 @@ face_points = get_face_points(input_points, input_faces)
 # [pointnum_1, pointnum_2, facenum_1, facenum_2] or
 # [pointnum_1, pointnum_2, facenum_1, None]
 
-edges = get_edges_faces(input_points, input_faces)
-            
-for e in edges:
-    print(e)
+edges_faces = get_edges_faces(input_points, input_faces)
 
+# get edge points, a list of points
+
+edge_points = get_edge_points(input_points, edges_faces)
+                
+for ep in edge_points:
+    print(ep)
